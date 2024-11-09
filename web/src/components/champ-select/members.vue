@@ -2,33 +2,54 @@
     <div class="scrollable-content">
         <div class="team">
             <span class="team-name">Your Team</span>
-            <div class="team-member my" v-for="member in state.myTeam">
+            <div class="team-member my" v-for="member in state.myTeam" :key="member.cellId">
                 <div class="member-background" :style="getBackgroundStyle(member)"></div>
                 <div class="active-background" :class="getActiveOverlayClass(member)"></div>
+                
                 <div class="summoner-spells" v-if="member.playerType !== 'BOT'">
                     <img :src="getSummonerSpellImage(member.spell1Id)">
                     <img :src="getSummonerSpellImage(member.spell2Id)">
                 </div>
+                
                 <div class="info" :class="member.playerType === 'BOT' && 'bot'">
                     <span class="name">{{ member.displayName }}</span>
                     <span class="state">{{ getMemberSubtext(member) }}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="team enemy-team" v-if="state.theirTeam.length > 0">
-            <span class="team-name">Enemy Team</span>
-            <div class="team-member enemy" v-for="member in state.theirTeam">
-                <div class="member-background" :style="getBackgroundStyle(member)"></div>
-                <div class="active-background" :class="getActiveOverlayClass(member)"></div>
-                <div class="info">
-                    <span class="name">{{ member.displayName }}</span>
-                    <span class="state">{{ getMemberSubtext(member) }}</span>
+                    
+                    <!-- Trade Buttons -->
+                    <div class="trade-buttons" v-if="getTradeForMember(member.cellId)">
+                        <template v-if="getTradeForMember(member.cellId).state === 'AVAILABLE'">
+                            <!-- Show Request Trade button if trade is available -->
+                            <button @click="requestTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                 <img :src="require('../../static/trade/trade.png')" alt="Request Trade" style="height: 80px;" />
+                            </button>
+                        </template>
+                        <template v-else-if="getTradeForMember(member.cellId).state === 'SENT'">
+                            <!-- Show Cancel button if local player requested trade -->
+                            <button @click="cancelTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                <img :src="require('../../static/trade/cancel.png')" alt="Cancel Trade" style="height: 80px;" />
+                            </button>
+                        </template>
+                        <template v-else-if="getTradeForMember(member.cellId).state === 'RECEIVED'">
+                            <div style="display: flex; align-items: center;">
+                                <!-- Show Accept and Decline buttons if there's a pending trade request from another player -->
+                                <button @click="acceptTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/trade/accept.png')" alt="Accept Trade" style="height: 80px;" />
+                                </button>
+                                <div style="width: 20px;"></div>
+                                <button @click="declineTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/trade/decline.png')" alt="Decline Trade" style="height: 80px;" />
+                                </button>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+
+
 
 <script lang="ts" src="./members.ts"></script>
 

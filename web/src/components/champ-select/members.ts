@@ -4,6 +4,12 @@ import { Component, Prop } from "vue-property-decorator";
 import { default as ChampSelect, ChampSelectState, ChampSelectMember } from "./champ-select";
 import { POSITION_NAMES } from "@/constants";
 
+interface Trade {
+    cellId: number;
+    id: number;
+    state: string;
+}
+
 @Component
 export default class Members extends Vue {
     $root: Root;
@@ -11,6 +17,120 @@ export default class Members extends Vue {
 
     @Prop()
     state: ChampSelectState;
+
+    // Store the trades fetched from the API
+    trades: Trade[] = [];
+    tradeRefreshInterval: number = 1000; // Interval in milliseconds
+
+    mounted() {
+        this.startTradePolling();
+    }
+
+    // beforeDestroy() {
+    //     clearInterval(this.tradePollingTimer);
+    // }
+
+    // Timer reference for clearing the polling interval
+    tradePollingTimer: number | undefined = undefined;
+
+    /**
+     * Start polling trades every few seconds.
+     */
+    startTradePolling() {
+        this.fetchAvailableTrades(); // Fetch initially
+        this.tradePollingTimer = window.setInterval(this.fetchAvailableTrades, this.tradeRefreshInterval);
+    }
+
+
+    /**
+     * Fetch available trades and store them.
+     */
+    async fetchAvailableTrades() {
+        try {
+            const response = await this.$root.request("/lol-champ-select/v1/session/trades", "GET");
+            if (response.status === 200) {
+                this.trades = response.content || [];
+                console.log(`FETCH trades: ${JSON.stringify(this.trades)}`)
+            }
+        } catch (error) {
+            console.error("Failed to fetch available trades:", error);
+        }
+    }
+
+    /**
+     * Gets the trade associated with a given cellId, if available.
+     */
+    getTradeForMember(cellId: number): Trade | null {
+        return this.trades.find(trade => trade.cellId === cellId) || null;
+    }
+
+    /**
+     * Requests a trade with a team member based on their trade ID.
+     * @param tradeId - The trade ID of the summoner to request a trade with.
+     */
+    requestTrade(tradeId: number) {
+        const url = `/lol-champ-select/v1/session/trades/${tradeId}/request`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                if (response.status === 200) {
+                    console.log("Trade request sent successfully:", response.content);
+                    this.fetchAvailableTrades(); // Refresh trades immediately
+                } else {
+                    console.error("Failed to send trade request:", response);
+                }
+            })
+            .catch(error => {
+                console.error("Error during trade request:", error);
+            });
+    }
+
+    /**
+     * Accepts a pending trade request.
+     * @param tradeId - The trade ID of the trade request to accept.
+     */
+    acceptTrade(tradeId: number) {
+        const url = `/lol-champ-select/v1/session/trades/${tradeId}/accept`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("Trade accepted:", response.content);
+                this.fetchAvailableTrades(); // Refresh trades immediately
+            })
+            .catch(error => {
+                console.error("Error accepting trade:", error);
+            });
+    }
+
+    /**
+     * Declines a pending trade request.
+     * @param tradeId - The trade ID of the trade request to decline.
+     */
+    declineTrade(tradeId: number) {
+        const url = `/lol-champ-select/v1/session/trades/${tradeId}/decline`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("Trade declined:", response.content);
+                this.fetchAvailableTrades(); // Refresh trades immediately
+            })
+            .catch(error => {
+                console.error("Error declining trade:", error);
+            });
+    }
+
+    /**
+     * Cancels a trade request that was initiated.
+     * @param tradeId - The trade ID of the trade request to cancel.
+     */
+    cancelTrade(tradeId: number) {
+        const url = `/lol-champ-select/v1/session/trades/${tradeId}/cancel`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("Trade request canceled:", response.content);
+                this.fetchAvailableTrades(); // Refresh trades immediately
+            })
+            .catch(error => {
+                console.error("Error canceling trade:", error);
+            });
+    }
 
     /**
      * @returns the background champion splash image for the specified member.
@@ -67,7 +187,7 @@ export default class Members extends Vue {
     }
 
     /**
-     * @returns the url to the icon for the specified summoner icon id
+     * @returns the URL to the icon for the specified summoner spell id
      */
     getSummonerSpellImage(id: number): string {
         if (!this.$parent.summonerSpellDetails[id]) return "";

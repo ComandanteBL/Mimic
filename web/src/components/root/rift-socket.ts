@@ -20,7 +20,7 @@ export default class RiftSocket {
     private encrypted = false;
 
     constructor(private code: string) {
-        this.socket = new WebSocket("wss://rift.mimic.lol/mobile?code=" + code);
+        this.socket = new WebSocket("ws://localhost:51001/mobile?code=" + code);
         this.socket.onopen = this.handleOpen;
         this.socket.onmessage = this.handleMessage;
         this.socket.onclose = this.handleClose;

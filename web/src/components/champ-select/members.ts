@@ -27,28 +27,6 @@ export default class Members extends Vue {
     // Store the trades fetched from the API
     trades: Trade[] = [];
     swaps: Swap[] = [];
-    tradeRefreshInterval: number = 1000; // Interval in milliseconds
-
-    mounted() {
-        this.startPolling();
-    }
-
-    // Timer reference for clearing the polling interval
-    pollingTimer: number | undefined = undefined;
-
-    /**
-     * Start polling trades every few seconds.
-     */
-    startPolling() {
-        this.fetchAvailableTrades();
-        this.fetchAvailableSwaps(); // Fetch swaps
-        this.pollingTimer = window.setInterval(() => {
-            this.fetchAvailableTrades();
-            this.fetchAvailableSwaps();
-        }, this.tradeRefreshInterval);
-    }
-
-
     
     /**
      * Fetch available trades and store them.

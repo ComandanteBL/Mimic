@@ -42,6 +42,32 @@
                             </div>
                         </template>
                     </div>
+
+                    <!-- Swap Buttons -->
+                    <div class="swap-buttons" v-if="getSwapForMember(member.cellId)">
+                        <template v-if="getSwapForMember(member.cellId).state === 'AVAILABLE'">
+                            <button @click="requestSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                <img :src="require('../../static/trade/swap.png')" alt="Request Swap" style="height: 80px;" />
+                            </button>
+                        </template>
+                        <template v-else-if="getSwapForMember(member.cellId).state === 'SENT'">
+                            <button @click="cancelSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                <img :src="require('../../static/trade/cancel.png')" alt="Cancel Swap" style="height: 80px;" />
+                            </button>
+                        </template>
+                        <template v-else-if="getSwapForMember(member.cellId).state === 'RECEIVED'">
+                            <div style="display: flex; align-items: center;">
+                                <button @click="acceptSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/trade/accept.png')" alt="Accept Swap" style="height: 80px;" />
+                                </button>
+                                <div style="width: 20px;"></div>
+                                <button @click="declineSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/trade/decline.png')" alt="Decline Swap" style="height: 80px;" />
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    
                 </div>
             </div>
         </div>

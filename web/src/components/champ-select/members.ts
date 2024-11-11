@@ -10,6 +10,12 @@ interface Trade {
     state: string;
 }
 
+interface Swap {
+    cellId: number;
+    id: number;
+    state: string;
+}
+
 @Component
 export default class Members extends Vue {
     $root: Root;
@@ -20,28 +26,30 @@ export default class Members extends Vue {
 
     // Store the trades fetched from the API
     trades: Trade[] = [];
+    swaps: Swap[] = [];
     tradeRefreshInterval: number = 1000; // Interval in milliseconds
 
     mounted() {
-        this.startTradePolling();
+        this.startPolling();
     }
 
-    // beforeDestroy() {
-    //     clearInterval(this.tradePollingTimer);
-    // }
-
     // Timer reference for clearing the polling interval
-    tradePollingTimer: number | undefined = undefined;
+    pollingTimer: number | undefined = undefined;
 
     /**
      * Start polling trades every few seconds.
      */
-    startTradePolling() {
-        this.fetchAvailableTrades(); // Fetch initially
-        this.tradePollingTimer = window.setInterval(this.fetchAvailableTrades, this.tradeRefreshInterval);
+    startPolling() {
+        this.fetchAvailableTrades();
+        this.fetchAvailableSwaps(); // Fetch swaps
+        this.pollingTimer = window.setInterval(() => {
+            this.fetchAvailableTrades();
+            this.fetchAvailableSwaps();
+        }, this.tradeRefreshInterval);
     }
 
 
+    
     /**
      * Fetch available trades and store them.
      */
@@ -58,10 +66,32 @@ export default class Members extends Vue {
     }
 
     /**
+     * Fetch available swaps and store them.
+     */
+    async fetchAvailableSwaps() {
+        try {
+            const response = await this.$root.request("/lol-champ-select/v1/session/swaps", "GET");
+            if (response.status === 200) {
+                this.swaps = response.content || [];
+                console.log(`FETCH swaps: ${JSON.stringify(this.swaps)}`);
+            }
+        } catch (error) {
+            console.error("Failed to fetch available swaps:", error);
+        }
+    }
+
+    /**
      * Gets the trade associated with a given cellId, if available.
      */
     getTradeForMember(cellId: number): Trade | null {
         return this.trades.find(trade => trade.cellId === cellId) || null;
+    }
+
+    /**
+     * Gets the swap associated with a given cellId, if available.
+     */
+    getSwapForMember(cellId: number): Swap | null {
+        return this.swaps.find(swap => swap.cellId === cellId) || null;
     }
 
     /**
@@ -130,6 +160,51 @@ export default class Members extends Vue {
             .catch(error => {
                 console.error("Error canceling trade:", error);
             });
+    }
+
+    // Swap methods
+    requestSwap(swapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${swapId}/request`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                if (response.status === 200) {
+                    console.log("Swap request sent successfully:", response.content);
+                    this.fetchAvailableSwaps();
+                } else {
+                    console.error("Failed to send swap request:", response);
+                }
+            })
+            .catch(error => console.error("Error during swap request:", error));
+    }
+
+    acceptSwap(swapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${swapId}/accept`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("Swap accepted:", response.content);
+                this.fetchAvailableSwaps();
+            })
+            .catch(error => console.error("Error accepting swap:", error));
+    }
+
+    declineSwap(swapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${swapId}/decline`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("Swap declined:", response.content);
+                this.fetchAvailableSwaps();
+            })
+            .catch(error => console.error("Error declining swap:", error));
+    }
+
+    cancelSwap(swapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${swapId}/cancel`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("Swap request canceled:", response.content);
+                this.fetchAvailableSwaps();
+            })
+            .catch(error => console.error("Error canceling swap:", error));
     }
 
     /**

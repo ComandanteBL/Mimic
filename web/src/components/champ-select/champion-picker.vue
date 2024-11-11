@@ -4,7 +4,7 @@
             <i class="ion-minus close" @click="$emit('close')"></i>
             <div class="header">{{ header }}</div>
 
-            <input ref="searchInput" v-model="searchTerm" type="text" class="search" autocomplete="off" spellcheck="false" placeholder="Search..." maxlength="24" autocorrect="off" autocapitalize="off">
+            <input ref="searchInput" :value="searchTerm" @input="(e) => searchTerm = e.target.value" type="text" class="search" autocomplete="off" spellcheck="false" placeholder="Search..." maxlength="24" autocorrect="off" autocapitalize="off">
 
             <div class="content">
                 <a class="champion-option" v-for="champId in selectableChampions">

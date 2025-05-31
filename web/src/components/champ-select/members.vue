@@ -15,58 +15,93 @@
                     <span class="name">{{ member.displayName }}</span>
                     <span class="state">{{ getMemberSubtext(member) }}</span>
                     
-                    <!-- Trade Buttons -->
-                    <div class="trade-buttons" v-if="getTradeForMember(member.cellId)">
-                        <template v-if="getTradeForMember(member.cellId).state === 'AVAILABLE'">
-                            <!-- Show Request Trade button if trade is available -->
-                            <button @click="requestTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                 <img :src="require('../../static/trade/trade.png')" alt="Request Trade" style="height: 80px;" />
-                            </button>
-                        </template>
-                        <template v-else-if="getTradeForMember(member.cellId).state === 'SENT'">
-                            <!-- Show Cancel button if local player requested trade -->
-                            <button @click="cancelTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                <img :src="require('../../static/trade/cancel.png')" alt="Cancel Trade" style="height: 80px;" />
-                            </button>
-                        </template>
-                        <template v-else-if="getTradeForMember(member.cellId).state === 'RECEIVED'">
-                            <div style="display: flex; align-items: center;">
-                                <!-- Show Accept and Decline buttons if there's a pending trade request from another player -->
-                                <button @click="acceptTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                    <img :src="require('../../static/trade/accept.png')" alt="Accept Trade" style="height: 80px;" />
-                                </button>
-                                <div style="width: 20px;"></div>
-                                <button @click="declineTrade(getTradeForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                    <img :src="require('../../static/trade/decline.png')" alt="Decline Trade" style="height: 80px;" />
-                                </button>
-                            </div>
-                        </template>
-                    </div>
+                    <div style="display: flex; align-items: center;">
 
-                    <!-- Swap Buttons -->
-                    <div class="swap-buttons" v-if="getSwapForMember(member.cellId)">
-                        <template v-if="getSwapForMember(member.cellId).state === 'AVAILABLE'">
-                            <button @click="requestSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                <img :src="require('../../static/trade/swap.png')" alt="Request Swap" style="height: 80px;" />
-                            </button>
-                        </template>
-                        <template v-else-if="getSwapForMember(member.cellId).state === 'SENT'">
-                            <button @click="cancelSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                <img :src="require('../../static/trade/cancel.png')" alt="Cancel Swap" style="height: 80px;" />
-                            </button>
-                        </template>
-                        <template v-else-if="getSwapForMember(member.cellId).state === 'RECEIVED'">
-                            <div style="display: flex; align-items: center;">
-                                <button @click="acceptSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                    <img :src="require('../../static/trade/accept.png')" alt="Accept Swap" style="height: 80px;" />
+                        <!-- Pick order swap Buttons -->
+                        <div class="pick-order-swap-buttons" v-if="getPickOrderForMember(member.cellId)">
+                            <template v-if="getPickOrderForMember(member.cellId).state === 'AVAILABLE'">
+                                <!-- Show Request button if pick order swap is available -->
+                                <button @click="requestPickOrderSwap(getPickOrderForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/swaps/pickorderswap.png')" alt="Request pick order swap" style="height: 80px;" />
                                 </button>
                                 <div style="width: 20px;"></div>
-                                <button @click="declineSwap(getSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                    <img :src="require('../../static/trade/decline.png')" alt="Decline Swap" style="height: 80px;" />
+                            </template>
+                            <template v-else-if="getPickOrderForMember(member.cellId).state === 'SENT'">
+                                <!-- Show Cancel button if local player requested pick order swap -->
+                                <button @click="cancelPickOrderSwap(getPickOrderForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/swaps/cancel.png')" alt="Cancel pick order swap" style="height: 80px;" />
                                 </button>
-                            </div>
-                        </template>
-                    </div>
+                            </template>
+                            <template v-else-if="getPickOrderForMember(member.cellId).state === 'RECEIVED'">
+                                <div style="display: flex; align-items: center;">
+                                    <!-- Show Accept and Decline buttons if there's a pending pick order swap request from another player -->
+                                    <button @click="acceptPickOrderSwap(getPickOrderForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                        <img :src="require('../../static/swaps/accept.png')" alt="Accept pick order swap" style="height: 80px;" />
+                                    </button>
+                                    <div style="width: 20px;"></div>
+                                    <button @click="declinePickOrderSwap(getPickOrderForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                        <img :src="require('../../static/swaps/decline.png')" alt="Decline pick order swap" style="height: 80px;" />
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+
+                                            <!-- Role swap Buttons -->
+                        <div class="role-swap-buttons" v-if="getRoleSwapForMember(member.cellId)">
+                            <template v-if="getRoleSwapForMember(member.cellId).state === 'AVAILABLE'">
+                                <!-- Show Request button if Role swap swap is available -->
+                                <button @click="requestRoleSwap(getRoleSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/swaps/roleswap.png')" alt="Request Role swap" style="height: 80px;" />
+                                </button>
+                            </template>
+                            <template v-else-if="getRoleSwapForMember(member.cellId).state === 'SENT'">
+                                <!-- Show Cancel button if local player requested Role swap -->
+                                <button @click="cancelRoleSwap(getRoleSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/swaps/cancel.png')" alt="Cancel Role swap" style="height: 80px;" />
+                                </button>
+                            </template>
+                            <template v-else-if="getRoleSwapForMember(member.cellId).state === 'RECEIVED'">
+                                <div style="display: flex; align-items: center;">
+                                    <!-- Show Accept and Decline buttons if there's a pending Role swap request from another player -->
+                                    <button @click="acceptRoleSwap(getRoleSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                        <img :src="require('../../static/swaps/accept.png')" alt="Accept Role swap" style="height: 80px;" />
+                                    </button>
+                                    <div style="width: 20px;"></div>
+                                    <button @click="declineRoleSwap(getRoleSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                        <img :src="require('../../static/swaps/decline.png')" alt="Decline Role swap" style="height: 80px;" />
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Champion swap Buttons -->
+                        <div class="champion-swap-buttons" v-if="getChampionSwapForMember(member.cellId)">
+                            <template v-if="getChampionSwapForMember(member.cellId).state === 'AVAILABLE'">
+                                <button @click="requestChampionSwap(getChampionSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/swaps/championswap.png')" alt="Request champion swap" style="height: 80px;" />
+                                </button>
+                            </template>
+                            <template v-else-if="getChampionSwapForMember(member.cellId).state === 'SENT'">
+                                <button @click="cancelChampionSwap(getChampionSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                    <img :src="require('../../static/swaps/cancel.png')" alt="Cancel champion swap" style="height: 80px;" />
+                                </button>
+                            </template>
+                            <template v-else-if="getChampionSwapForMember(member.cellId).state === 'RECEIVED'">
+                                <div style="display: flex; align-items: center;">
+                                    <button @click="acceptChampionSwap(getChampionSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                        <img :src="require('../../static/swaps/accept.png')" alt="Accept champion swap" style="height: 80px;" />
+                                    </button>
+                                    <div style="width: 20px;"></div>
+                                    <button @click="declineChampionSwap(getChampionSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
+                                        <img :src="require('../../static/swaps/decline.png')" alt="Decline champion swap" style="height: 80px;" />
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                    </div>   
+                    
                     
                 </div>
             </div>

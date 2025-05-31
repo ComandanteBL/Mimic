@@ -4,13 +4,19 @@ import { Component, Prop } from "vue-property-decorator";
 import { default as ChampSelect, ChampSelectState, ChampSelectMember } from "./champ-select";
 import { POSITION_NAMES } from "@/constants";
 
-interface Trade {
+interface PickOrderSwap {
     cellId: number;
     id: number;
     state: string;
 }
 
-interface Swap {
+interface RoleSwap {
+    cellId: number;
+    id: number;
+    state: string;
+}
+
+interface ChampionSwap {
     cellId: number;
     id: number;
     state: string;
@@ -24,165 +30,235 @@ export default class Members extends Vue {
     @Prop()
     state: ChampSelectState;
 
-    // Store the trades fetched from the API
-    trades: Trade[] = [];
-    swaps: Swap[] = [];
+    // Store the pick orders and champion swaps fetched from the API
+    pickOrders: PickOrderSwap[] = [];
+    roleSwaps: RoleSwap[] = [];
+    championSwaps: ChampionSwap[] = [];
     
     /**
-     * Fetch available trades and store them.
+     * Fetch available pick orders and store them.
      */
-    async fetchAvailableTrades() {
+    async fetchAvailablePickOrders() {
         try {
-            const response = await this.$root.request("/lol-champ-select/v1/session/trades", "GET");
+            const response = await this.$root.request("/lol-champ-select/v1/session/pick-order-swaps", "GET");
+            console.log(response.content);
+            console.log(response.status);
             if (response.status === 200) {
-                this.trades = response.content || [];
-                console.log(`FETCH trades: ${JSON.stringify(this.trades)}`)
+                this.pickOrders = response.content || [];
+                console.log(`FETCH pick orders: ${JSON.stringify(this.pickOrders)}`)
             }
         } catch (error) {
-            console.error("Failed to fetch available trades:", error);
+            console.error("Failed to fetch pick orders:", error);
         }
     }
 
     /**
-     * Fetch available swaps and store them.
+     * Fetch available role swaps and store them.
      */
-    async fetchAvailableSwaps() {
+    async fetchAvailableRoleSwaps() {
+        try {
+            const response = await this.$root.request("/lol-champ-select/v1/session/position-swaps", "GET");
+            if (response.status === 200) {
+                this.roleSwaps = response.content || [];
+                console.log(`FETCH role swaps: ${JSON.stringify(this.roleSwaps)}`)
+            }
+        } catch (error) {
+            console.error("Failed to fetch role swaps:", error);
+        }
+    }
+
+    /**
+     * Fetch available champion swaps and store them.
+     */
+    async fetchAvailableChampionSwaps() {
         try {
             const response = await this.$root.request("/lol-champ-select/v1/session/swaps", "GET");
             if (response.status === 200) {
-                this.swaps = response.content || [];
-                console.log(`FETCH swaps: ${JSON.stringify(this.swaps)}`);
+                this.championSwaps = response.content || [];
+                console.log(`FETCH champion swaps: ${JSON.stringify(this.championSwaps)}`);
             }
         } catch (error) {
-            console.error("Failed to fetch available swaps:", error);
+            console.error("Failed to fetch available champion swaps:", error);
         }
     }
 
     /**
-     * Gets the trade associated with a given cellId, if available.
+     * Gets the pick orders associated with a given cellId, if available.
      */
-    getTradeForMember(cellId: number): Trade | null {
-        return this.trades.find(trade => trade.cellId === cellId) || null;
+    getPickOrderForMember(cellId: number): PickOrderSwap | null {
+        console.log("pick order for member: " + cellId);
+        const aa = this.pickOrders.find(po => po.cellId === cellId) || null;
+        console.log(this.pickOrders);
+        if (aa){
+            console.log("PO state:" + aa.state);
+            console.log("=====");
+        }
+        return this.pickOrders.find(po => po.cellId === cellId) || null;
     }
 
     /**
-     * Gets the swap associated with a given cellId, if available.
+     * Gets the role swaps associated with a given cellId, if available.
      */
-    getSwapForMember(cellId: number): Swap | null {
-        return this.swaps.find(swap => swap.cellId === cellId) || null;
+    getRoleSwapForMember(cellId: number): RoleSwap | null {
+        return this.roleSwaps.find(rs => rs.cellId === cellId) || null;
     }
 
     /**
-     * Requests a trade with a team member based on their trade ID.
-     * @param tradeId - The trade ID of the summoner to request a trade with.
+     * Gets the champion associated with a given cellId, if available.
      */
-    requestTrade(tradeId: number) {
-        const url = `/lol-champ-select/v1/session/trades/${tradeId}/request`;
+    getChampionSwapForMember(cellId: number): ChampionSwap | null {
+        return this.championSwaps.find(cs => cs.cellId === cellId) || null;
+    }
+
+    // Pick order swap methods
+    requestPickOrderSwap(pickOrderId: number) {
+        const url = `/lol-champ-select/v1/session/pick-order-swaps/${pickOrderId}/request`;
         this.$root.request(url, "POST")
             .then(response => {
                 if (response.status === 200) {
-                    console.log("Trade request sent successfully:", response.content);
-                    this.fetchAvailableTrades(); // Refresh trades immediately
+                    console.log("Pick order swap request sent successfully:", response.content);
+                    this.fetchAvailablePickOrders(); // Refresh pick orders immediately
                 } else {
-                    console.error("Failed to send trade request:", response);
+                    console.error("Failed to send pick order swap request:", response);
                 }
             })
             .catch(error => {
-                console.error("Error during trade request:", error);
+                console.error("Error during pick order swap request:", error);
             });
     }
 
-    /**
-     * Accepts a pending trade request.
-     * @param tradeId - The trade ID of the trade request to accept.
-     */
-    acceptTrade(tradeId: number) {
-        const url = `/lol-champ-select/v1/session/trades/${tradeId}/accept`;
+    acceptPickOrderSwap(pickOrderId: number) {
+        const url = `/lol-champ-select/v1/session/pick-order-swaps/${pickOrderId}/accept`;
         this.$root.request(url, "POST")
             .then(response => {
-                console.log("Trade accepted:", response.content);
-                this.fetchAvailableTrades(); // Refresh trades immediately
+                console.log("Pick order swap accepted:", response.content);
+                this.fetchAvailablePickOrders(); // Refresh pick orders immediately
             })
             .catch(error => {
-                console.error("Error accepting trade:", error);
+                console.error("Error accepting pick order swap:", error);
             });
     }
 
-    /**
-     * Declines a pending trade request.
-     * @param tradeId - The trade ID of the trade request to decline.
-     */
-    declineTrade(tradeId: number) {
-        const url = `/lol-champ-select/v1/session/trades/${tradeId}/decline`;
+    declinePickOrderSwap(pickOrderId: number) {
+        const url = `/lol-champ-select/v1/session/pick-order-swaps/${pickOrderId}/decline`;
         this.$root.request(url, "POST")
             .then(response => {
-                console.log("Trade declined:", response.content);
-                this.fetchAvailableTrades(); // Refresh trades immediately
+                console.log("Pick order swap declined:", response.content);
+                this.fetchAvailablePickOrders(); // Refresh pick orders immediately
             })
             .catch(error => {
-                console.error("Error declining trade:", error);
+                console.error("Error declining pick order swap:", error);
             });
     }
 
-    /**
-     * Cancels a trade request that was initiated.
-     * @param tradeId - The trade ID of the trade request to cancel.
-     */
-    cancelTrade(tradeId: number) {
-        const url = `/lol-champ-select/v1/session/trades/${tradeId}/cancel`;
+    cancelPickOrderSwap(pickOrderId: number) {
+        const url = `/lol-champ-select/v1/session/pick-order-swaps/${pickOrderId}/cancel`;
         this.$root.request(url, "POST")
             .then(response => {
-                console.log("Trade request canceled:", response.content);
-                this.fetchAvailableTrades(); // Refresh trades immediately
+                console.log("Pick order swap request canceled:", response.content);
+                this.fetchAvailablePickOrders(); // Refresh pick orders immediately
             })
             .catch(error => {
-                console.error("Error canceling trade:", error);
+                console.error("Error canceling pick order swap:", error);
             });
     }
 
-    // Swap methods
-    requestSwap(swapId: number) {
-        const url = `/lol-champ-select/v1/session/swaps/${swapId}/request`;
+    // Role Swap methods
+    requestRoleSwap(roleSwapId: number) {
+        const url = `/lol-champ-select/v1/session/position-swaps/${roleSwapId}/request`;
         this.$root.request(url, "POST")
             .then(response => {
                 if (response.status === 200) {
-                    console.log("Swap request sent successfully:", response.content);
-                    this.fetchAvailableSwaps();
+                    console.log("role swap request sent successfully:", response.content);
+                    this.fetchAvailableRoleSwaps(); // Refresh role swaps immediately
                 } else {
-                    console.error("Failed to send swap request:", response);
+                    console.error("Failed to send role swap request:", response);
+                }
+            })
+            .catch(error => {
+                console.error("Error during role swap request:", error);
+            });
+    }
+
+    acceptRoleSwap(roleSwapId: number) {
+        const url = `/lol-champ-select/v1/session/position-swaps/${roleSwapId}/accept`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("role swap accepted:", response.content);
+                this.fetchAvailableRoleSwaps(); // Refresh role swaps immediately
+            })
+            .catch(error => {
+                console.error("Error accepting role swap:", error);
+            });
+    }
+
+    declineRoleSwap(roleSwapId: number) {
+        const url = `/lol-champ-select/v1/session/position-swaps/${roleSwapId}/decline`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("role swap declined:", response.content);
+                this.fetchAvailableRoleSwaps(); // Refresh role swaps immediately
+            })
+            .catch(error => {
+                console.error("Error declining role swap:", error);
+            });
+    }
+
+    cancelRoleSwap(roleSwapId: number) {
+        const url = `/lol-champ-select/v1/session/position-swaps/${roleSwapId}/cancel`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                console.log("role swap request canceled:", response.content);
+                this.fetchAvailableRoleSwaps(); // Refresh role swaps immediately
+            })
+            .catch(error => {
+                console.error("Error canceling role swap:", error);
+            });
+    }
+
+    // Champion Swap methods
+    requestChampionSwap(championSwapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${championSwapId}/request`;
+        this.$root.request(url, "POST")
+            .then(response => {
+                if (response.status === 200) {
+                    console.log("Champion swap request sent successfully:", response.content);
+                    this.fetchAvailableChampionSwaps();
+                } else {
+                    console.error("Failed to send champion swap request:", response);
                 }
             })
             .catch(error => console.error("Error during swap request:", error));
     }
 
-    acceptSwap(swapId: number) {
-        const url = `/lol-champ-select/v1/session/swaps/${swapId}/accept`;
+    acceptChampionSwap(championSwapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${championSwapId}/accept`;
         this.$root.request(url, "POST")
             .then(response => {
-                console.log("Swap accepted:", response.content);
-                this.fetchAvailableSwaps();
+                console.log("Champion swap accepted:", response.content);
+                this.fetchAvailableChampionSwaps();
             })
-            .catch(error => console.error("Error accepting swap:", error));
+            .catch(error => console.error("Error accepting champion swap:", error));
     }
 
-    declineSwap(swapId: number) {
-        const url = `/lol-champ-select/v1/session/swaps/${swapId}/decline`;
+    declineChampionSwap(championSwapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${championSwapId}/decline`;
         this.$root.request(url, "POST")
             .then(response => {
-                console.log("Swap declined:", response.content);
-                this.fetchAvailableSwaps();
+                console.log("Champion swap declined:", response.content);
+                this.fetchAvailableChampionSwaps();
             })
-            .catch(error => console.error("Error declining swap:", error));
+            .catch(error => console.error("Error declining champion swap:", error));
     }
 
-    cancelSwap(swapId: number) {
-        const url = `/lol-champ-select/v1/session/swaps/${swapId}/cancel`;
+    cancelChampionSwap(championSwapId: number) {
+        const url = `/lol-champ-select/v1/session/swaps/${championSwapId}/cancel`;
         this.$root.request(url, "POST")
             .then(response => {
-                console.log("Swap request canceled:", response.content);
-                this.fetchAvailableSwaps();
+                console.log("Champion swap request canceled:", response.content);
+                this.fetchAvailableChampionSwaps();
             })
-            .catch(error => console.error("Error canceling swap:", error));
+            .catch(error => console.error("Error canceling champion swap:", error));
     }
 
     /**

@@ -171,6 +171,7 @@ namespace Conduit
                 {
                     try
                     {
+                        await Task.Delay(1000);
                         await Request("POST", "/lol-matchmaking/v1/ready-check/accept", null);
                     }
                     catch (Exception ex)

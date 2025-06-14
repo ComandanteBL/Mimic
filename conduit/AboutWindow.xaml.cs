@@ -105,5 +105,10 @@ namespace Conduit
         {
             Persistence.ToggleLaunchAtStartup();
         }
+
+        private void HandleAutoAccept(object sender, EventArgs e)
+        {
+            // to be implemented
+        }
     }
 }

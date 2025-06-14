@@ -24,7 +24,6 @@
                                 <button @click="requestPickOrderSwap(getPickOrderForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
                                     <img :src="require('../../static/swaps/pickorderswap.png')" alt="Request pick order swap" style="height: 80px;" />
                                 </button>
-                                <div style="width: 20px;"></div>
                             </template>
                             <template v-else-if="getPickOrderForMember(member.cellId).state === 'SENT'">
                                 <!-- Show Cancel button if local player requested pick order swap -->
@@ -46,7 +45,7 @@
                             </template>
                         </div>
 
-
+                        <div style="width: 20px;"></div>
                                             <!-- Role swap Buttons -->
                         <div class="role-swap-buttons" v-if="getRoleSwapForMember(member.cellId)">
                             <template v-if="getRoleSwapForMember(member.cellId).state === 'AVAILABLE'">
@@ -65,15 +64,17 @@
                                 <div style="display: flex; align-items: center;">
                                     <!-- Show Accept and Decline buttons if there's a pending Role swap request from another player -->
                                     <button @click="acceptRoleSwap(getRoleSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                        <img :src="require('../../static/swaps/accept.png')" alt="Accept Role swap" style="height: 80px;" />
+                                        <img :src="require('../../static/swaps/redaccept.png')" alt="Accept Role swap" style="height: 80px;" />
                                     </button>
                                     <div style="width: 20px;"></div>
                                     <button @click="declineRoleSwap(getRoleSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                        <img :src="require('../../static/swaps/decline.png')" alt="Decline Role swap" style="height: 80px;" />
+                                        <img :src="require('../../static/swaps/reddecline.png')" alt="Decline Role swap" style="height: 80px;" />
                                     </button>
                                 </div>
                             </template>
                         </div>
+
+                        <div style="width: 20px;"></div>
 
                         <!-- Champion swap Buttons -->
                         <div class="champion-swap-buttons" v-if="getChampionSwapForMember(member.cellId)">
@@ -90,11 +91,11 @@
                             <template v-else-if="getChampionSwapForMember(member.cellId).state === 'RECEIVED'">
                                 <div style="display: flex; align-items: center;">
                                     <button @click="acceptChampionSwap(getChampionSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                        <img :src="require('../../static/swaps/accept.png')" alt="Accept champion swap" style="height: 80px;" />
+                                        <img :src="require('../../static/swaps/redaccept.png')" alt="Accept champion swap" style="height: 80px;" />
                                     </button>
                                     <div style="width: 20px;"></div>
                                     <button @click="declineChampionSwap(getChampionSwapForMember(member.cellId).id)" style="border: none; padding: 0; background: none;">
-                                        <img :src="require('../../static/swaps/decline.png')" alt="Decline champion swap" style="height: 80px;" />
+                                        <img :src="require('../../static/swaps/reddecline.png')" alt="Decline champion swap" style="height: 80px;" />
                                     </button>
                                 </div>
                             </template>

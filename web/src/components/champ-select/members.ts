@@ -34,6 +34,26 @@ export default class Members extends Vue {
     pickOrders: PickOrderSwap[] = [];
     roleSwaps: RoleSwap[] = [];
     championSwaps: ChampionSwap[] = [];
+
+    tradeRefreshInterval: number = 500; // Interval in milliseconds
+    pollingTimer: number | undefined = undefined;
+
+    mounted() {
+        this.startPolling();
+    }
+
+    startPolling() {
+        this.fetchAvailablePickOrders();
+        this.fetchAvailableRoleSwaps();
+        this.fetchAvailableChampionSwaps();
+        this.pollingTimer = window.setInterval(() => {
+        this.fetchAvailablePickOrders();
+        this.fetchAvailableRoleSwaps();
+        this.fetchAvailableChampionSwaps();
+        }, this.tradeRefreshInterval);
+
+
+    }
     
     /**
      * Fetch available pick orders and store them.
@@ -41,8 +61,6 @@ export default class Members extends Vue {
     async fetchAvailablePickOrders() {
         try {
             const response = await this.$root.request("/lol-champ-select/v1/session/pick-order-swaps", "GET");
-            console.log(response.content);
-            console.log(response.status);
             if (response.status === 200) {
                 this.pickOrders = response.content || [];
                 console.log(`FETCH pick orders: ${JSON.stringify(this.pickOrders)}`)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,6 +21,7 @@ namespace Conduit
         private static readonly string HUB_TOKEN_PATH = Path.Combine(DATA_DIRECTORY, "token");
         private static readonly string KEYPAIR_PATH = Path.Combine(DATA_DIRECTORY, "keys");
         private static readonly string DEVICES_PATH = Path.Combine(DATA_DIRECTORY, "devices");
+        private static readonly string SETTINGS_PATH = Path.Combine(DATA_DIRECTORY, "settings");
         private static readonly RegistryKey BOOT_KEY = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         static Persistence()
@@ -182,6 +184,59 @@ namespace Conduit
             File.WriteAllText(KEYPAIR_PATH, writer.ToString());
 
             return provider;
+        }
+
+        /**
+         * Gets or sets whether the auto-accept feature is enabled
+         */
+        public static bool AutoAcceptEnabled
+        {
+            get => GetSetting("autoAccept", true); // Default to true to match original behavior
+            set => SetSetting("autoAccept", value);
+        }
+
+        /**
+         * Gets a setting value with a default fallback
+         */
+        private static bool GetSetting(string key, bool defaultValue)
+        {
+            try
+            {
+                if (!File.Exists(SETTINGS_PATH)) return defaultValue;
+
+                var lines = File.ReadAllLines(SETTINGS_PATH);
+                var line = lines.FirstOrDefault(l => l.StartsWith(key + "="));
+                if (line == null) return defaultValue;
+
+                return bool.Parse(line.Substring(key.Length + 1));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        /**
+         * Sets a setting value
+         */
+        private static void SetSetting(string key, bool value)
+        {
+            try
+            {
+                var lines = File.Exists(SETTINGS_PATH) ? File.ReadAllLines(SETTINGS_PATH).ToList() : new List<string>();
+
+                // Remove existing setting if it exists
+                lines.RemoveAll(l => l.StartsWith(key + "="));
+
+                // Add new setting
+                lines.Add($"{key}={value}");
+
+                File.WriteAllLines(SETTINGS_PATH, lines);
+            }
+            catch
+            {
+                // Ignore errors
+            }
         }
     }
 }

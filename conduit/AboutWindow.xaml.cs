@@ -18,7 +18,7 @@ namespace Conduit
             InitializeComponent();
             Logo.Source = Imaging.CreateBitmapSourceFromHIcon(Properties.Resources.mimic.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             StartOnStartupCheckbox.IsChecked = Persistence.LaunchesAtStartup();
-
+            AutoAcceptCheckbox.IsChecked = Persistence.AutoAcceptEnabled; // Load saved setting
             AboutTitle.Content = "Mimic Conduit v" + Program.VERSION;
 
             if (Persistence.GetHubCode() != null)
@@ -106,9 +106,10 @@ namespace Conduit
             Persistence.ToggleLaunchAtStartup();
         }
 
-        private void HandleAutoAccept(object sender, EventArgs e)
+        private void HandleAutoAccept(object sender, RoutedEventArgs e)
         {
-            // to be implemented
+            // Save the new value when checkbox changes
+            Persistence.AutoAcceptEnabled = AutoAcceptCheckbox.IsChecked == true;
         }
     }
 }

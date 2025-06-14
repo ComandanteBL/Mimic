@@ -7,6 +7,7 @@ using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using Conduit;
 
 namespace Conduit
 {
@@ -163,6 +164,21 @@ namespace Conduit
                 Type = ev["eventType"],
                 Data = ev["eventType"] == "Delete" ? null : ev["data"]
             });
+
+            if (ev["uri"] == "/lol-matchmaking/v1/ready-check" && Persistence.AutoAcceptEnabled)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Request("POST", "/lol-matchmaking/v1/ready-check/accept", null);
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLogger.Global.WriteError($"Failed to accept ready check: {ex.Message}");
+                    }
+                });
+            }
         }
 
         /**

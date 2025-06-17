@@ -107,6 +107,19 @@
                 </div>
             </div>
         </div>
+
+        <div class="team enemy-team" v-if="state.theirTeam.length > 0">
+            <span class="team-name">Enemy Team</span>
+            <div class="team-member enemy" v-for="member in state.theirTeam">
+                <div class="member-background" :style="getBackgroundStyle(member)"></div>
+                <div class="active-background" :class="getActiveOverlayClass(member)"></div>
+                <div class="info">
+                    <span class="name">{{ member.displayName }}</span>
+                    <span class="state">{{ getMemberSubtext(member) }}</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
